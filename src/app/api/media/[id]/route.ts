@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Readable } from "node:stream";
 import { existsSync, statSync, createReadStream } from "node:fs";
-import { getExtraction, saveExtraction, cleanupStore, Extraction } from "@/lib/store";
+import { getExtraction, saveExtraction, cleanupStore, type Extraction } from "@/lib/store";
 import {
   ensureMergedMediaFile,
   ensureSingleMediaFile,

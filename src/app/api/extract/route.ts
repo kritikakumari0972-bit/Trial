@@ -8,7 +8,7 @@ import {
   saveInfoJson,
   fetchInvidiousExtraction,
 } from "@/lib/yt-dlp";
-import { saveExtraction, cleanupStore } from "@/lib/store";
+import { saveExtraction, cleanupStore, type Extraction } from "@/lib/store";
 import { safeDownloadName } from "@/lib/filename";
 
 export const dynamic = "force-dynamic";
@@ -17,9 +17,9 @@ export const maxDuration = 300;
 
 export async function POST(req: Request) {
   cleanupStore();
-  let body: any;
+  let body: { url?: string; cookies?: string; proxy?: string } | null = null;
   try {
-    body = await req.json();
+    body = (await req.json()) as { url?: string; cookies?: string; proxy?: string };
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
   }
 }
 
-function toPublic(e: any) {
+function toPublic(e: Extraction) {
   return {
     id: e.id,
     title: e.title,
@@ -97,7 +97,7 @@ function toPublic(e: any) {
     uploader: e.uploader,
     platform: e.platform,
     sourceUrl: e.sourceUrl,
-    formats: e.formats.map((f: any, i: number) => ({
+    formats: e.formats.map((f, i: number) => ({
       index: i,
       type: f.type,
       label: f.label,

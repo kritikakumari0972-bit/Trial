@@ -127,14 +127,23 @@ export default function HomePage() {
     }, 1200);
   }
 
-  const mediaSrc = result
-    ? `/api/media/${result.id}?i=${formatIndex}&url=${encodeURIComponent(result.sourceUrl)}`
-    : "";
-  const selected = result?.formats?.[formatIndex];
-  const audioFormat = result?.formats.find((f) => f.type === "audio");
-  const thumbFormat = result?.formats.find(
-    (f) => f.type === "image" && f.label.toLowerCase().startsWith("thumbnail")
+  const videoFormats = useMemo(
+    () => result?.formats.filter((f) => f.type === "video") || [],
+    [result]
   );
+  const audioFormat = useMemo(
+    () => result?.formats.find((f) => f.type === "audio"),
+    [result]
+  );
+  const thumbFormat = useMemo(
+    () => result?.formats.find((f) => f.type === "image"),
+    [result]
+  );
+
+  const selected = videoFormats[formatIndex] || videoFormats[0] || result?.formats[0];
+  const mediaSrc = result && selected
+    ? `/api/media/${result.id}?i=${selected.index}&url=${encodeURIComponent(result.sourceUrl)}`
+    : "";
 
   const chips = useMemo(
     () =>
@@ -291,19 +300,24 @@ export default function HomePage() {
             </div>
 
             <div className="mt-5 flex flex-col gap-3">
-              {result.formats.length > 1 && (
-                <select
-                  value={formatIndex}
-                  onChange={(e) => setFormatIndex(Number(e.target.value))}
-                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white sm:max-w-md"
-                >
-                  {result.formats.map((f) => (
-                    <option key={f.index} value={f.index}>
-                      {f.label}
-                      {f.filesize ? ` — ${formatSize(f.filesize)}` : ""}
-                    </option>
-                  ))}
-                </select>
+              {videoFormats.length > 1 && (
+                <div className="flex flex-col gap-1.5 sm:max-w-md">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    Video Resolution
+                  </label>
+                  <select
+                    value={formatIndex}
+                    onChange={(e) => setFormatIndex(Number(e.target.value))}
+                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-3.5 py-2.5 text-sm font-medium text-white outline-none transition focus:border-indigo-400/60"
+                  >
+                    {videoFormats.map((f, i) => (
+                      <option key={f.index} value={i}>
+                        {f.label}
+                        {f.filesize ? ` — ${formatSize(f.filesize)}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
 
               <div className="flex flex-wrap items-center gap-3">
@@ -319,7 +333,7 @@ export default function HomePage() {
                 )}
                 {audioFormat && (
                   <SaveButton
-                    label="Save audio"
+                    label="Save Audio"
                     tone="fuchsia"
                     busy={dl?.key === "audio"}
                     downloadHref={`/api/media/${result.id}?i=${audioFormat.index}&download=1&url=${encodeURIComponent(result.sourceUrl)}`}
@@ -329,7 +343,7 @@ export default function HomePage() {
                 )}
                 {thumbFormat && (
                   <SaveButton
-                    label="Save thumbnail"
+                    label="Save Thumbnail"
                     tone="sky"
                     busy={dl?.key === "thumb"}
                     downloadHref={`/api/media/${result.id}?i=${thumbFormat.index}&download=1&url=${encodeURIComponent(result.sourceUrl)}`}

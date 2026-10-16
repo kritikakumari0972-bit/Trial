@@ -72,8 +72,7 @@ export async function resolveBinary(): Promise<string> {
 
   const candidates = [
     process.env.YTDLP_PATH,
-    path.join(process.cwd(), "bin", "yt-dlp"),
-    path.join(__dirname, "..", "..", "bin", "yt-dlp"),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), "bin", "yt-dlp"),
     "/usr/local/bin/yt-dlp",
   ].filter(Boolean) as string[];
 
@@ -110,15 +109,17 @@ export async function resolveFfmpegBinary(): Promise<string | undefined> {
 
   let staticPath: string | undefined;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require("ffmpeg-static");
-    staticPath = typeof mod === "string" ? mod : mod?.default;
+    const mod = await import("ffmpeg-static");
+    const p = mod.default;
+    if (typeof p === "string") {
+      staticPath = p;
+    }
   } catch {}
 
   const candidates = [
     process.env.FFMPEG_PATH,
     staticPath,
-    path.join(process.cwd(), "bin", "ffmpeg"),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), "bin", "ffmpeg"),
     "/usr/bin/ffmpeg",
     "/usr/local/bin/ffmpeg",
   ].filter(Boolean) as string[];
@@ -208,8 +209,8 @@ export function prepareCookiesFile(customCookie?: string): string | undefined {
   const candidates = [
     process.env.YOUTUBE_COOKIES_FILE,
     process.env.COOKIES_FILE,
-    path.join(process.cwd(), "cookies.txt"),
-    path.join(process.cwd(), "bin", "cookies.txt"),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), "cookies.txt"),
+    path.join(/*turbopackIgnore: true*/ process.cwd(), "bin", "cookies.txt"),
     TMP_COOKIES,
   ].filter(Boolean) as string[];
 
