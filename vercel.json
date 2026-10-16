@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "functions": {
+    "src/app/api/**/*": {
+      "maxDuration": 300,
+      "memory": 1024
+    },
+    "api/**/*": {
+      "maxDuration": 300,
+      "memory": 1024
+    }
+  }
+}
